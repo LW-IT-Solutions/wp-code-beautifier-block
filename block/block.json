@@ -1,0 +1,57 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "code-beautifier-block/code",
+	"version": "1.0.0",
+	"title": "Code Beautifier",
+	"category": "text",
+	"icon": "editor-code",
+	"description": "Highlighted code that stays inside the layout. Long lines wrap or scroll inside the block.",
+	"keywords": [ "code", "syntax", "highlight", "snippet", "pre" ],
+	"textdomain": "code-beautifier-block",
+	"attributes": {
+		"code": {
+			"type": "string",
+			"source": "text",
+			"selector": "code"
+		},
+		"language": {
+			"type": "string",
+			"default": "auto"
+		},
+		"title": {
+			"type": "string",
+			"default": ""
+		},
+		"lineNumbers": {
+			"type": "string",
+			"enum": [ "auto", "on", "off" ],
+			"default": "auto"
+		},
+		"wrap": {
+			"type": "boolean",
+			"default": true
+		},
+		"startLine": {
+			"type": "integer",
+			"default": 1
+		},
+		"highlightLines": {
+			"type": "string",
+			"default": ""
+		}
+	},
+	"supports": {
+		"html": false
+	},
+	"example": {
+		"attributes": {
+			"language": "php",
+			"code": "<?php\n// Long values wrap inside the block.\n$url = 'https://example.com/a-very-long-path-without-any-spaces-that-would-otherwise-push-the-layout-sideways';\necho esc_url( $url );"
+		}
+	},
+	"editorScript": "file:./editor.js",
+	"editorStyle": "file:./editor.css",
+	"style": "file:./style.css",
+	"viewScript": "file:./view.js"
+}

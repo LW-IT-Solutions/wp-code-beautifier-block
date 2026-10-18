@@ -1,0 +1,431 @@
+/*
+ * Code Beautifier Block - front end.
+ *
+ * Layout rules first: the block takes the width of its column and never more.
+ * "contain: inline-size" stops a long line from widening flex or grid parents,
+ * the inner <pre> scrolls on its own, and in wrap mode even unbroken strings
+ * (URLs, hashes, base64) break at any character.
+ *
+ * Colours are custom properties. A theme can set any --cbb-* variable on .cbb
+ * to blend the block in; light and dark follow the visitor's system setting or
+ * a data-theme / dark class on the page.
+ */
+
+.cbb {
+	--cbb-bg: #f6f8fa;
+	--cbb-fg: #1f2328;
+	--cbb-head-bg: #eef1f4;
+	--cbb-border: #d0d7de;
+	--cbb-muted: #59636e;
+	--cbb-gutter: #8c959f;
+	--cbb-mark: rgba(212, 167, 44, 0.18);
+	--cbb-mark-edge: #d4a72c;
+	--cbb-focus: #0969da;
+	--cbb-comment: #59636e;
+	--cbb-keyword: #cf222e;
+	--cbb-string: #0a3069;
+	--cbb-number: #0550ae;
+	--cbb-function: #8250df;
+	--cbb-variable: #953800;
+	--cbb-type: #953800;
+	--cbb-attr: #0550ae;
+	--cbb-tag: #116329;
+	--cbb-constant: #0550ae;
+	--cbb-meta: #8250df;
+	--cbb-selector: #6639ba;
+	--cbb-operator: #cf222e;
+	--cbb-inserted-bg: #dafbe1;
+	--cbb-inserted: #116329;
+	--cbb-deleted-bg: #ffebe9;
+	--cbb-deleted: #82071e;
+	--cbb-font: ui-monospace, "Cascadia Code", "JetBrains Mono", "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", "DejaVu Sans Mono", monospace;
+	--cbb-font-size: 0.875em;
+	--cbb-radius: 8px;
+}
+
+@media (prefers-color-scheme: dark) {
+	.cbb {
+		--cbb-bg: #0f1418;
+		--cbb-fg: #e1e7ed;
+		--cbb-head-bg: #161d23;
+		--cbb-border: #2d3748;
+		--cbb-muted: #9aa7b4;
+		--cbb-gutter: #5d6b78;
+		--cbb-mark: rgba(242, 204, 96, 0.13);
+		--cbb-mark-edge: #e3b341;
+		--cbb-focus: #58a6ff;
+		--cbb-comment: #8b98a5;
+		--cbb-keyword: #ff7b72;
+		--cbb-string: #a5d6ff;
+		--cbb-number: #79c0ff;
+		--cbb-function: #d2a8ff;
+		--cbb-variable: #ffa657;
+		--cbb-type: #ffa657;
+		--cbb-attr: #79c0ff;
+		--cbb-tag: #7ee787;
+		--cbb-constant: #79c0ff;
+		--cbb-meta: #d2a8ff;
+		--cbb-selector: #d2a8ff;
+		--cbb-operator: #ff7b72;
+		--cbb-inserted-bg: rgba(46, 160, 67, 0.18);
+		--cbb-inserted: #7ee787;
+		--cbb-deleted-bg: rgba(248, 81, 73, 0.18);
+		--cbb-deleted: #ffa198;
+	}
+}
+
+/* An explicit choice on the page wins over the system setting. */
+:root[data-theme="light"] .cbb,
+:root.light .cbb,
+.cbb.cbb--light {
+	--cbb-bg: #f6f8fa;
+	--cbb-fg: #1f2328;
+	--cbb-head-bg: #eef1f4;
+	--cbb-border: #d0d7de;
+	--cbb-muted: #59636e;
+	--cbb-gutter: #8c959f;
+	--cbb-mark: rgba(212, 167, 44, 0.18);
+	--cbb-mark-edge: #d4a72c;
+	--cbb-focus: #0969da;
+	--cbb-comment: #59636e;
+	--cbb-keyword: #cf222e;
+	--cbb-string: #0a3069;
+	--cbb-number: #0550ae;
+	--cbb-function: #8250df;
+	--cbb-variable: #953800;
+	--cbb-type: #953800;
+	--cbb-attr: #0550ae;
+	--cbb-tag: #116329;
+	--cbb-constant: #0550ae;
+	--cbb-meta: #8250df;
+	--cbb-selector: #6639ba;
+	--cbb-operator: #cf222e;
+	--cbb-inserted-bg: #dafbe1;
+	--cbb-inserted: #116329;
+	--cbb-deleted-bg: #ffebe9;
+	--cbb-deleted: #82071e;
+}
+
+:root[data-theme="dark"] .cbb,
+:root.dark .cbb,
+.is-dark-theme .cbb,
+.cbb.cbb--dark {
+	--cbb-bg: #0f1418;
+	--cbb-fg: #e1e7ed;
+	--cbb-head-bg: #161d23;
+	--cbb-border: #2d3748;
+	--cbb-muted: #9aa7b4;
+	--cbb-gutter: #5d6b78;
+	--cbb-mark: rgba(242, 204, 96, 0.13);
+	--cbb-mark-edge: #e3b341;
+	--cbb-focus: #58a6ff;
+	--cbb-comment: #8b98a5;
+	--cbb-keyword: #ff7b72;
+	--cbb-string: #a5d6ff;
+	--cbb-number: #79c0ff;
+	--cbb-function: #d2a8ff;
+	--cbb-variable: #ffa657;
+	--cbb-type: #ffa657;
+	--cbb-attr: #79c0ff;
+	--cbb-tag: #7ee787;
+	--cbb-constant: #79c0ff;
+	--cbb-meta: #d2a8ff;
+	--cbb-selector: #d2a8ff;
+	--cbb-operator: #ff7b72;
+	--cbb-inserted-bg: rgba(46, 160, 67, 0.18);
+	--cbb-inserted: #7ee787;
+	--cbb-deleted-bg: rgba(248, 81, 73, 0.18);
+	--cbb-deleted: #ffa198;
+}
+
+/* ---- Frame ---------------------------------------------------------- */
+
+.cbb {
+	box-sizing: border-box;
+	display: block;
+	contain: inline-size;
+	width: 100%;
+	max-width: 100%;
+	min-width: 0;
+	margin: 0 0 1.75em;
+	padding: 0;
+	overflow: hidden;
+	color: var(--cbb-fg);
+	background: var(--cbb-bg);
+	border: 1px solid var(--cbb-border);
+	border-radius: var(--cbb-radius);
+	text-align: left;
+	direction: ltr;
+}
+
+.cbb *,
+.cbb *::before,
+.cbb *::after {
+	box-sizing: border-box;
+}
+
+/* ---- Header --------------------------------------------------------- */
+
+.cbb .cbb-head {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 4px 10px;
+	margin: 0;
+	padding: 5px 6px 5px 14px;
+	min-height: 36px;
+	background: var(--cbb-head-bg);
+	border-bottom: 1px solid var(--cbb-border);
+	color: var(--cbb-muted);
+	font-family: inherit;
+	font-size: 12px;
+	font-style: normal;
+	line-height: 1.4;
+	text-align: left;
+}
+
+.cbb .cbb-lang {
+	font-weight: 600;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	white-space: nowrap;
+}
+
+.cbb .cbb-title {
+	min-width: 0;
+	flex: 1 1 auto;
+	color: var(--cbb-fg);
+	font-family: var(--cbb-font);
+	overflow-wrap: anywhere;
+}
+
+.cbb .cbb-actions {
+	display: flex;
+	gap: 4px;
+	margin-left: auto;
+	visibility: hidden;
+}
+
+/* Buttons only appear once the script runs; without it they would do nothing. */
+.cbb-js .cbb .cbb-actions {
+	visibility: visible;
+}
+
+.cbb .cbb-button {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	margin: 0;
+	padding: 3px 8px;
+	min-height: 26px;
+	min-width: 26px;
+	color: var(--cbb-muted);
+	background: transparent;
+	border: 1px solid transparent;
+	border-radius: 6px;
+	box-shadow: none;
+	font: inherit;
+	font-size: 12px;
+	line-height: 1.2;
+	text-transform: none;
+	letter-spacing: normal;
+	cursor: pointer;
+}
+
+.cbb .cbb-button:hover {
+	color: var(--cbb-fg);
+	background: transparent;
+	border-color: var(--cbb-border);
+}
+
+.cbb .cbb-button:focus-visible,
+.cbb .cbb-pre:focus-visible {
+	outline: 2px solid var(--cbb-focus);
+	outline-offset: -2px;
+}
+
+.cbb .cbb-button svg {
+	display: block;
+	flex: none;
+}
+
+.cbb .cbb-button--wrap[aria-pressed="true"] {
+	color: var(--cbb-fg);
+	border-color: var(--cbb-border);
+}
+
+.cbb .cbb-button.is-done {
+	color: var(--cbb-tag);
+}
+
+.cbb .cbb-sr {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+/* ---- Code ----------------------------------------------------------- */
+
+.cbb .cbb-pre {
+	display: block;
+	width: 100%;
+	max-width: none;
+	margin: 0;
+	padding: 14px 0;
+	overflow-x: auto;
+	overflow-y: hidden;
+	color: inherit;
+	background: transparent;
+	border: 0;
+	border-radius: 0;
+	box-shadow: none;
+	font-family: var(--cbb-font);
+	font-size: var(--cbb-font-size);
+	line-height: 1.65;
+	white-space: pre;
+	overflow-wrap: normal;
+	word-break: normal;
+	tab-size: 4;
+	-moz-tab-size: 4;
+	font-variant-ligatures: none;
+	-webkit-text-size-adjust: 100%;
+	text-size-adjust: 100%;
+	scrollbar-width: thin;
+}
+
+.cbb .cbb-code {
+	display: block;
+	min-width: 100%;
+	width: max-content;
+	margin: 0;
+	padding: 0;
+	color: inherit;
+	background: transparent;
+	border: 0;
+	border-radius: 0;
+	font: inherit;
+	white-space: inherit;
+	overflow-wrap: inherit;
+	word-break: inherit;
+}
+
+.cbb .cbb-line {
+	display: block;
+	min-height: 1.65em;
+	padding: 0 18px 0 16px;
+}
+
+.cbb .cbb-line--marked {
+	background: var(--cbb-mark);
+	box-shadow: inset 3px 0 0 var(--cbb-mark-edge);
+}
+
+/* Wrap mode: lines break inside the block, even inside long unbroken strings. */
+.cbb.cbb--wrap .cbb-pre {
+	overflow-x: hidden;
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+	word-break: normal;
+}
+
+.cbb.cbb--wrap .cbb-code {
+	width: auto;
+}
+
+/* Line numbers: a counter, so they are never selected or copied. */
+.cbb.cbb--numbers .cbb-line {
+	counter-increment: cbb-line;
+}
+
+.cbb.cbb--numbers .cbb-line::before {
+	content: counter(cbb-line);
+	display: inline-block;
+	position: sticky;
+	left: 0;
+	width: calc(var(--cbb-digits, 2) * 1ch + 24px);
+	margin-left: -16px;
+	padding: 0 12px 0 0;
+	color: var(--cbb-gutter);
+	background: var(--cbb-bg);
+	text-align: right;
+	-webkit-user-select: none;
+	user-select: none;
+}
+
+.cbb.cbb--numbers .cbb-line--marked::before {
+	background: transparent;
+}
+
+.cbb.cbb--wrap.cbb--numbers .cbb-line {
+	position: relative;
+	padding-left: calc(var(--cbb-digits, 2) * 1ch + 24px);
+}
+
+.cbb.cbb--wrap.cbb--numbers .cbb-line::before {
+	position: absolute;
+	left: 0;
+	top: 0;
+	margin-left: 0;
+	background: transparent;
+}
+
+/* ---- Tokens --------------------------------------------------------- */
+
+.cbb .cbb-comment { color: var(--cbb-comment); font-style: italic; }
+.cbb .cbb-keyword { color: var(--cbb-keyword); }
+.cbb .cbb-string { color: var(--cbb-string); }
+.cbb .cbb-number { color: var(--cbb-number); }
+.cbb .cbb-function { color: var(--cbb-function); }
+.cbb .cbb-variable { color: var(--cbb-variable); }
+.cbb .cbb-type { color: var(--cbb-type); }
+.cbb .cbb-attr { color: var(--cbb-attr); }
+.cbb .cbb-tag { color: var(--cbb-tag); }
+.cbb .cbb-constant { color: var(--cbb-constant); }
+.cbb .cbb-meta { color: var(--cbb-meta); }
+.cbb .cbb-selector { color: var(--cbb-selector); }
+.cbb .cbb-operator { color: var(--cbb-operator); }
+.cbb .cbb-punct { color: var(--cbb-muted); }
+.cbb .cbb-inserted { color: var(--cbb-inserted); background: var(--cbb-inserted-bg); }
+.cbb .cbb-deleted { color: var(--cbb-deleted); background: var(--cbb-deleted-bg); }
+
+/* Narrow screens: a little smaller, so more of each line fits. */
+@media (max-width: 600px) {
+	.cbb {
+		--cbb-font-size: 0.8125em;
+	}
+
+	.cbb .cbb-head {
+		padding-left: 12px;
+	}
+
+	.cbb .cbb-line {
+		padding-right: 12px;
+		padding-left: 12px;
+	}
+
+	.cbb.cbb--numbers .cbb-line::before {
+		margin-left: -12px;
+	}
+}
+
+@media print {
+	.cbb .cbb-actions {
+		display: none;
+	}
+
+	.cbb .cbb-pre {
+		overflow: visible;
+		white-space: pre-wrap;
+		overflow-wrap: anywhere;
+	}
+
+	.cbb .cbb-code {
+		width: auto;
+	}
+}
