@@ -49,7 +49,8 @@ final class Code_Beautifier_Renderer {
 		$body = '';
 		foreach ( $lines as $i => $html ) {
 			$class = isset( $marked[ $start + $i ] ) ? 'cbb-line cbb-line--marked' : 'cbb-line';
-			$body .= '<span class="' . $class . '">' . $html . ( $i < $count - 1 ? "\n" : '' ) . '</span>';
+			// $html is already escaped token by token in lines().
+			$body .= '<span class="' . esc_attr( $class ) . '">' . $html . ( $i < $count - 1 ? "\n" : '' ) . '</span>';
 		}
 
 		$classes = array( 'cbb' );
@@ -63,7 +64,7 @@ final class Code_Beautifier_Renderer {
 		$wrapper = get_block_wrapper_attributes(
 			array(
 				'class'     => implode( ' ', $classes ),
-				'style'     => '--cbb-digits:' . $digits . ';',
+				'style'     => '--cbb-digits:' . absint( $digits ) . ';',
 				'data-lang' => $lang,
 			)
 		);
@@ -85,7 +86,7 @@ final class Code_Beautifier_Renderer {
 			. '</figcaption>';
 
 		return '<figure ' . $wrapper . '>' . $head
-			. '<pre class="cbb-pre" tabindex="0"><code class="cbb-code language-' . esc_attr( $lang ) . '" style="counter-reset:cbb-line ' . ( $start - 1 ) . ';">'
+			. '<pre class="cbb-pre" tabindex="0"><code class="cbb-code language-' . esc_attr( $lang ) . '" style="counter-reset:cbb-line ' . esc_attr( (string) ( $start - 1 ) ) . ';">'
 			. $body
 			. '</code></pre></figure>';
 	}
@@ -174,7 +175,7 @@ final class Code_Beautifier_Renderer {
 				if ( '' === $part ) {
 					continue;
 				}
-				$lines[ $current ] .= ( null === $type ) ? self::esc( $part ) : '<span class="cbb-' . $type . '">' . self::esc( $part ) . '</span>';
+				$lines[ $current ] .= ( null === $type ) ? self::esc( $part ) : '<span class="' . esc_attr( 'cbb-' . $type ) . '">' . self::esc( $part ) . '</span>';
 			}
 		}
 		return $lines;
