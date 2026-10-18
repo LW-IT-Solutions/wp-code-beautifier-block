@@ -48,7 +48,7 @@ Available: `--cbb-bg`, `--cbb-fg`, `--cbb-head-bg`, `--cbb-border`, `--cbb-muted
 
 = Does it load JavaScript on every page? =
 
-No. The stylesheet and a small script for the two buttons (about 3 KB) are loaded only where the block is used.
+No. The stylesheet and the script for the two buttons (under 3 KB, no dependencies) are loaded only on pages that contain the block.
 
 = What happens with shortcodes inside a code sample? =
 
