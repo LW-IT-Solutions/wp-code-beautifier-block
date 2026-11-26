@@ -258,6 +258,17 @@
 	color: var(--cbb-tag);
 }
 
+/* Result of copying, below the code. Empty and therefore invisible until a reader copies. */
+.cbb .cbb-status:not(:empty) {
+	display: block;
+	padding: 8px 14px;
+	border-top: 1px solid var(--cbb-border);
+	background: var(--cbb-head-bg);
+	color: var(--cbb-fg);
+	font: 0.8125em/1.5 system-ui, sans-serif;
+	overflow-wrap: anywhere;
+}
+
 .cbb .cbb-sr {
 	position: absolute;
 	width: 1px;

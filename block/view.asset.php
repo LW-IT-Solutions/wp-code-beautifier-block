@@ -1,3 +1,3 @@
 <?php
 defined( 'ABSPATH' ) || exit;
-return array( 'dependencies' => array(), 'version' => '1.0.1' );
+return array( 'dependencies' => array(), 'version' => '1.0.2' );

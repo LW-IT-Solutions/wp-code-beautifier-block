@@ -4,7 +4,7 @@ Tags: code, syntax highlighting, code block, snippet, block
 Requires at least: 6.5
 Tested up to: 7.2
 Requires PHP: 7.4
-Stable tag: 1.0.1
+Stable tag: 1.0.2
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -20,7 +20,7 @@ What it does differently:
 * **Breaks unbroken strings.** In wrap mode a 300-character URL or token breaks at any character instead of pushing the layout sideways.
 * **Highlights on the server.** No highlighting library is loaded in the browser and nothing flickers after loading. The page contains finished markup.
 * **Readable fallback.** The post content keeps a plain `<pre><code>` copy of the code. If the plugin is ever deactivated, the code is still shown.
-* **Copy and wrap buttons.** Readers can copy the code (line numbers are never copied) and switch line wrapping per block.
+* **Copy and wrap buttons.** Readers can copy the code (line numbers are never copied) and switch line wrapping per block. The result of copying appears in a status line below the code, which screen readers announce; the button keeps its label and the keyboard focus.
 * **Light and dark.** Colours follow the visitor's system setting, or a `data-theme="light|dark"` attribute or `dark` class on the page. All colours are CSS custom properties, so a theme can adjust them.
 * **Line numbers, start number and highlighted lines.** Line numbers appear automatically from three lines on and can be switched on or off per block.
 
@@ -48,11 +48,15 @@ Available: `--cbb-bg`, `--cbb-fg`, `--cbb-head-bg`, `--cbb-border`, `--cbb-muted
 
 = Does it load JavaScript on every page? =
 
-No. The script for the copy and wrap buttons (under 3 KB, no dependencies) is loaded only on pages that contain the block. Whether the stylesheet is limited to those pages as well depends on WordPress and the theme: block themes load it only where the block is used, while classic themes may load the stylesheets of all blocks, this one included, on every page.
+No. The script for the copy and wrap buttons (under 5 KB, no dependencies) is loaded only on pages that contain the block. Whether the stylesheet is limited to those pages as well depends on WordPress and the theme: block themes load it only where the block is used, while classic themes may load the stylesheets of all blocks, this one included, on every page.
 
 = What happens with shortcodes inside a code sample? =
 
 They are shown, not executed. Square brackets are written as character references in the output.
+
+= In which language are the button texts? =
+
+In the language of the post. On a normal page view that is the language of the site. With Polylang, the language of the post is used also when the post is rendered in another language, for example in a REST response for a user with a different admin language; only the translation of this plugin is read for it, nothing else changes language. The preview in the editor uses the language of the user. Other multilingual plugins can set it with the filter `code_beautifier_block_locale` (arguments: locale, post ID).
 
 = Can I turn off wrapping by default? =
 
@@ -64,6 +68,11 @@ Yes, per block in the block settings ("Wrap long lines"). Readers can still swit
 2. Light mode: a long URL without spaces wraps inside the block instead of widening the page.
 
 == Changelog ==
+
+= 1.0.2 =
+* The copy button keeps its label; the result is shown and announced in a status line below the code. If copying fails, the code is selected and keyboard focus stays on the button.
+* The code area is a named region for screen readers ("Code example: …").
+* Button texts follow the language of the post, with Polylang also in REST responses. New filter `code_beautifier_block_locale`.
 
 = 1.0.1 =
 * The readme says exactly when the script and the stylesheet are loaded.
