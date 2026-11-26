@@ -74,14 +74,15 @@ final class Code_Beautifier_Renderer {
 		$label = Code_Beautifier_Highlighter::label( $lang );
 		$head  = '<figcaption class="cbb-head">'
 			. '<span class="cbb-lang">' . esc_html( $label ) . '</span>'
-			. ( '' !== $title ? '<span class="cbb-title">' . esc_html( $title ) . '</span>' : '' )
+			. ( '' !== $title ? '<span class="cbb-title"><svg class="cbb-title-icon" aria-hidden="true" focusable="false" width="14" height="14" viewBox="0 0 16 16"><path d="M4 1.75h5.25L12.5 5v9.25H4z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M9 2v3.25h3.25" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>' . esc_html( $title ) . '</span>' : '' )
 			. '<span class="cbb-actions">'
 			. '<button type="button" class="cbb-button cbb-button--wrap" data-cbb-action="wrap" aria-pressed="' . ( $wrap ? 'true' : 'false' ) . '" title="' . esc_attr( $texts['wrap'] ) . '">'
-			. '<svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16"><path d="M2 4h12M2 8h9.5a2.5 2.5 0 0 1 0 5H8m0 0 1.5-1.5M8 13l1.5 1.5M2 12h3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+			. '<svg class="cbb-icon-wrap" aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16"><path d="M2 4h12M2 8h9.5a2.5 2.5 0 0 1 0 5H8m0 0 1.5-1.5M8 13l1.5 1.5M2 12h3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
 			. '<span class="cbb-sr">' . esc_html( $texts['wrap'] ) . '</span>'
 			. '</button>'
 			. '<button type="button" class="cbb-button cbb-button--copy" data-cbb-action="copy" aria-label="' . esc_attr( $texts['copy_name'] ) . '" data-cbb-status-done="' . esc_attr( $texts['status_done'] ) . '" data-cbb-status-failed="' . esc_attr( $texts['status_failed'] ) . '" data-cbb-status-noselect="' . esc_attr( $texts['status_noselect'] ) . '">'
-			. '<svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16"><rect x="5.5" y="5.5" width="8" height="8.5" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M10.5 3.5V3A1.5 1.5 0 0 0 9 1.5H4A1.5 1.5 0 0 0 2.5 3v6.5A1.5 1.5 0 0 0 4 11h.5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>'
+			. '<svg class="cbb-icon-copy" aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16"><rect x="5.5" y="5.5" width="8" height="8.5" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M10.5 3.5V3A1.5 1.5 0 0 0 9 1.5H4A1.5 1.5 0 0 0 2.5 3v6.5A1.5 1.5 0 0 0 4 11h.5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>'
+			. '<svg class="cbb-icon-done" aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16"><path d="M3 8.5 6.5 12 13 4.5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>'
 			. '<span class="cbb-button-label">' . esc_html( $texts['copy'] ) . '</span>'
 			. '</button>'
 			. '</span>'

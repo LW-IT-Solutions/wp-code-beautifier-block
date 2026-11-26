@@ -12,6 +12,8 @@
 	var Fragment = element.Fragment;
 	var useState = element.useState;
 	var __ = i18n.__;
+	var _n = i18n._n;
+	var sprintf = i18n.sprintf;
 	var languages = window.codeBeautifierLanguages || [ { value: 'auto', label: 'Auto' } ];
 
 	// Must match Code_Beautifier_Renderer::escape_saved() character for character.
@@ -36,6 +38,41 @@
 	function languageFromClass( className ) {
 		var m = /(?:^|\s)(?:language|lang)-([\w+#-]+)/.exec( className || '' );
 		return m ? m[ 1 ] : 'auto';
+	}
+
+	// Same reading of "2, 5-7" as Code_Beautifier_Renderer::marked_lines(), for the hint below the field.
+	function parseLines( spec ) {
+		var count = 0;
+		var bad = [];
+		String( spec || '' ).split( ',' ).forEach( function ( part ) {
+			var m;
+			part = part.trim();
+			if ( '' === part ) {
+				return;
+			}
+			m = /^(\d+)\s*-\s*(\d+)$/.exec( part );
+			if ( m ) {
+				count += Math.max( 0, Math.min( parseInt( m[ 2 ], 10 ), parseInt( m[ 1 ], 10 ) + 5000 ) - parseInt( m[ 1 ], 10 ) + 1 );
+			} else if ( /^\d+$/.test( part ) ) {
+				count += 1;
+			} else {
+				bad.push( part );
+			}
+		} );
+		return { count: count, bad: bad };
+	}
+
+	function linesHelp( spec ) {
+		var parsed = parseLines( spec );
+		if ( parsed.bad.length ) {
+			/* translators: %s: parts of the line list that are not understood */
+			return sprintf( __( 'Not understood: %s. Use numbers and ranges, for example 2, 5-7.', 'code-beautifier-block' ), parsed.bad.join( ', ' ) );
+		}
+		if ( parsed.count ) {
+			/* translators: %d: number of highlighted lines */
+			return sprintf( _n( '%d line will be highlighted.', '%d lines will be highlighted.', parsed.count, 'code-beautifier-block' ), parsed.count );
+		}
+		return __( 'For example 2, 5-7', 'code-beautifier-block' );
 	}
 
 	function Edit( props ) {
@@ -102,7 +139,8 @@
 				} ),
 				el( components.TextControl, {
 					label: __( 'Highlight lines', 'code-beautifier-block' ),
-					help: __( 'For example 2, 5-7', 'code-beautifier-block' ),
+					help: linesHelp( attributes.highlightLines ),
+					className: parseLines( attributes.highlightLines ).bad.length ? 'cbb-editor__invalid' : undefined,
 					value: attributes.highlightLines,
 					onChange: function ( value ) {
 						setAttributes( { highlightLines: value } );
@@ -122,9 +160,28 @@
 			)
 		);
 
+		var lineCount = ( attributes.code || '' ).replace( /\s+$/, '' ).split( '\n' ).length;
+		var languageMenu = components.ToolbarDropdownMenu
+			? el( components.ToolbarDropdownMenu, {
+				icon: 'editor-code',
+				label: __( 'Language', 'code-beautifier-block' ),
+				text: current ? current.label : attributes.language,
+				controls: languages.map( function ( l ) {
+					return {
+						title: l.label,
+						isActive: l.value === attributes.language,
+						onClick: function () {
+							setAttributes( { language: l.value } );
+						},
+					};
+				} ),
+			} )
+			: null;
+
 		var toolbar = el(
 			blockEditor.BlockControls,
 			null,
+			el( components.ToolbarGroup, null, languageMenu ),
 			el(
 				components.ToolbarGroup,
 				null,
@@ -150,8 +207,24 @@
 				el(
 					'div',
 					{ className: 'cbb-editor__head' },
-					el( 'span', null, current ? current.label : attributes.language ),
-					attributes.title ? el( 'span', { className: 'cbb-editor__title' }, attributes.title ) : null
+					el( 'span', { className: 'cbb-editor__lang', 'data-lang': attributes.language }, current ? current.label : attributes.language ),
+					attributes.title ? el( 'span', { className: 'cbb-editor__title' }, attributes.title ) : null,
+					el(
+						'span',
+						{ className: 'cbb-editor__meta' },
+						attributes.code
+							? el(
+								'span',
+								null,
+								/* translators: %d: number of lines of code */
+								sprintf( _n( '%d line', '%d lines', lineCount, 'code-beautifier-block' ), lineCount )
+							)
+							: null,
+						el( 'span', { className: 'cbb-editor__chip' + ( attributes.wrap ? ' is-on' : '' ) }, attributes.wrap ? __( 'Wraps', 'code-beautifier-block' ) : __( 'Scrolls', 'code-beautifier-block' ) ),
+						attributes.highlightLines && parseLines( attributes.highlightLines ).count
+							? el( 'span', { className: 'cbb-editor__chip is-mark' }, __( 'Highlighted lines', 'code-beautifier-block' ) )
+							: null
+					)
 				),
 				el( blockEditor.PlainText, {
 					className: 'cbb-editor__input',

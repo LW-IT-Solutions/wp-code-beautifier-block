@@ -405,6 +405,186 @@
 .cbb .cbb-inserted { color: var(--cbb-inserted); background: var(--cbb-inserted-bg); }
 .cbb .cbb-deleted { color: var(--cbb-deleted); background: var(--cbb-deleted-bg); }
 
+/* ---- Details (1.1.0) ------------------------------------------------ */
+
+/* Colour mark of the language next to its name. A theme can set --cbb-lang. */
+.cbb { --cbb-lang: var(--cbb-gutter); }
+.cbb[data-lang="php"] { --cbb-lang: #777bb3; }
+.cbb[data-lang="javascript"] { --cbb-lang: #e5c100; }
+.cbb[data-lang="typescript"] { --cbb-lang: #3178c6; }
+.cbb[data-lang="css"] { --cbb-lang: #663399; }
+.cbb[data-lang="html"] { --cbb-lang: #e34c26; }
+.cbb[data-lang="json"] { --cbb-lang: #8c959f; }
+.cbb[data-lang="bash"], .cbb[data-lang="powershell"] { --cbb-lang: #3fb950; }
+.cbb[data-lang="python"] { --cbb-lang: #3572a5; }
+.cbb[data-lang="sql"] { --cbb-lang: #e38c00; }
+.cbb[data-lang="yaml"], .cbb[data-lang="ini"] { --cbb-lang: #cb171e; }
+.cbb[data-lang="diff"] { --cbb-lang: #2da44e; }
+.cbb[data-lang="markdown"] { --cbb-lang: #0969da; }
+.cbb[data-lang="dockerfile"] { --cbb-lang: #2496ed; }
+.cbb[data-lang="nginx"], .cbb[data-lang="apache"], .cbb[data-lang="http"] { --cbb-lang: #009639; }
+.cbb[data-lang="clike"] { --cbb-lang: #a8b9cc; }
+
+.cbb .cbb-lang {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.cbb .cbb-lang::before {
+	content: "";
+	flex: none;
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: var(--cbb-lang);
+	box-shadow: 0 0 0 1px color-mix(in srgb, var(--cbb-fg) 12%, transparent);
+}
+
+/* File name with a file symbol, separated from the language. */
+.cbb .cbb-title {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding-left: 10px;
+	border-left: 1px solid var(--cbb-border);
+}
+
+.cbb .cbb-title-icon {
+	flex: none;
+	color: var(--cbb-muted);
+}
+
+/* Copying: the symbol turns into a check mark while the status line shows the result. */
+.cbb .cbb-button .cbb-icon-done {
+	display: none;
+}
+
+.cbb .cbb-button.is-done .cbb-icon-copy {
+	display: none;
+}
+
+.cbb .cbb-button.is-done .cbb-icon-done {
+	display: block;
+}
+
+.cbb .cbb-button.is-done {
+	border-color: currentColor;
+	background: color-mix(in srgb, var(--cbb-tag) 12%, transparent);
+}
+
+.cbb .cbb-button:focus-visible {
+	outline-offset: 1px;
+}
+
+/* Status line: a symbol for success or failure, in the colours of the block. */
+.cbb .cbb-status.is-ok::before,
+.cbb .cbb-status.is-failed::before {
+	display: inline-block;
+	width: 1.25em;
+	margin-right: 6px;
+	border-radius: 50%;
+	color: var(--cbb-bg);
+	font-weight: 700;
+	line-height: 1.25em;
+	text-align: center;
+}
+
+.cbb .cbb-status.is-ok::before {
+	content: "\2713";
+	background: var(--cbb-tag);
+}
+
+.cbb .cbb-status.is-failed::before {
+	content: "!";
+	background: var(--cbb-keyword);
+}
+
+.cbb .cbb-status.is-ok {
+	box-shadow: inset 3px 0 0 var(--cbb-tag);
+}
+
+.cbb .cbb-status.is-failed {
+	box-shadow: inset 3px 0 0 var(--cbb-keyword);
+}
+
+/* Without wrapping: shadows at the edges show that the line goes on. */
+.cbb:not(.cbb--wrap) .cbb-pre {
+	background:
+		linear-gradient(to right, var(--cbb-bg) 30%, transparent) left center / 32px 100% no-repeat local,
+		linear-gradient(to left, var(--cbb-bg) 30%, transparent) right center / 32px 100% no-repeat local,
+		linear-gradient(to right, color-mix(in srgb, var(--cbb-fg) 16%, transparent), transparent) left center / 12px 100% no-repeat scroll,
+		linear-gradient(to left, color-mix(in srgb, var(--cbb-fg) 16%, transparent), transparent) right center / 12px 100% no-repeat scroll;
+}
+
+/* The line under the pointer, for following long lines. */
+@media (hover: hover) {
+	.cbb .cbb-line:not(.cbb-line--marked):hover {
+		background: color-mix(in srgb, var(--cbb-fg) 5%, transparent);
+	}
+}
+
+/* Highlighted lines: the number stands out too. */
+.cbb.cbb--numbers .cbb-line--marked::before {
+	color: var(--cbb-fg);
+	font-weight: 600;
+}
+
+/* Diff: added and removed lines are coloured across the whole width. */
+.cbb .cbb-line:has(> .cbb-inserted:first-child) {
+	background: var(--cbb-inserted-bg);
+	box-shadow: inset 3px 0 0 var(--cbb-inserted);
+}
+
+.cbb .cbb-line:has(> .cbb-deleted:first-child) {
+	background: var(--cbb-deleted-bg);
+	box-shadow: inset 3px 0 0 var(--cbb-deleted);
+}
+
+.cbb .cbb-line:has(> .cbb-inserted:first-child) > .cbb-inserted,
+.cbb .cbb-line:has(> .cbb-deleted:first-child) > .cbb-deleted {
+	background: transparent;
+}
+
+.cbb.cbb--numbers .cbb-line:has(> .cbb-inserted:first-child)::before,
+.cbb.cbb--numbers .cbb-line:has(> .cbb-deleted:first-child)::before {
+	background: transparent;
+}
+
+.cbb .cbb-code ::selection {
+	background: color-mix(in srgb, var(--cbb-focus) 30%, transparent);
+}
+
+/* Touch screens: buttons large enough to hit with a finger. */
+@media (pointer: coarse) {
+	.cbb .cbb-head {
+		min-height: 48px;
+	}
+
+	.cbb .cbb-button {
+		min-width: 40px;
+		min-height: 40px;
+		justify-content: center;
+	}
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	.cbb .cbb-button {
+		transition: color 0.15s, background-color 0.15s, border-color 0.15s;
+	}
+
+	.cbb .cbb-status:not(:empty) {
+		animation: cbb-status-in 0.18s ease-out;
+	}
+
+	@keyframes cbb-status-in {
+		from {
+			opacity: 0;
+			transform: translateY(-3px);
+		}
+	}
+}
+
 /* Narrow screens: a little smaller, so more of each line fits. */
 @media (max-width: 600px) {
 	.cbb {
@@ -413,6 +593,16 @@
 
 	.cbb .cbb-head {
 		padding-left: 12px;
+	}
+
+	/* Language and file name share the first line, the buttons go to the second. */
+	.cbb .cbb-title {
+		flex-basis: 0;
+	}
+
+	.cbb .cbb-title + .cbb-actions {
+		flex-basis: 100%;
+		justify-content: flex-end;
 	}
 
 	.cbb .cbb-line {

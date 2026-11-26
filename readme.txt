@@ -4,7 +4,7 @@ Tags: code, syntax highlighting, code block, snippet, block
 Requires at least: 6.5
 Tested up to: 7.2
 Requires PHP: 7.4
-Stable tag: 1.0.2
+Stable tag: 1.1.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -36,7 +36,7 @@ Set any of the custom properties on `.cbb` in your theme, for example:
 
 `.cbb { --cbb-bg: #101416; --cbb-border: #2d3748; --cbb-radius: 4px; }`
 
-Available: `--cbb-bg`, `--cbb-fg`, `--cbb-head-bg`, `--cbb-border`, `--cbb-muted`, `--cbb-gutter`, `--cbb-mark`, `--cbb-keyword`, `--cbb-string`, `--cbb-number`, `--cbb-function`, `--cbb-variable`, `--cbb-type`, `--cbb-attr`, `--cbb-tag`, `--cbb-constant`, `--cbb-comment`, `--cbb-meta`, `--cbb-font`, `--cbb-font-size`, `--cbb-radius`.
+Available: `--cbb-bg`, `--cbb-fg`, `--cbb-head-bg`, `--cbb-border`, `--cbb-muted`, `--cbb-gutter`, `--cbb-mark`, `--cbb-keyword`, `--cbb-string`, `--cbb-number`, `--cbb-function`, `--cbb-variable`, `--cbb-type`, `--cbb-attr`, `--cbb-tag`, `--cbb-constant`, `--cbb-comment`, `--cbb-meta`, `--cbb-font`, `--cbb-font-size`, `--cbb-radius`, `--cbb-lang` (colour mark of the language).
 
 == Installation ==
 
@@ -68,6 +68,15 @@ Yes, per block in the block settings ("Wrap long lines"). Readers can still swit
 2. Light mode: a long URL without spaces wraps inside the block instead of widening the page.
 
 == Changelog ==
+
+= 1.1.0 =
+* A colour mark for the language and a file symbol before the file name in the header of the block.
+* The copy button shows a check mark after copying; the status line has a symbol for success or failure.
+* Without wrapping, shadows at the edges show that a line goes on; the line under the pointer is lightly marked.
+* Diff: added and removed lines are coloured across the whole width; highlighted lines also mark their number.
+* Buttons are at least 40 pixels on touch screens; animations only without "reduce motion".
+* Editor: language menu in the block toolbar, line count and wrap state in the head, and a check of the "Highlight lines" field.
+* The saved block content is unchanged; existing blocks need no update.
 
 = 1.0.2 =
 * The copy button keeps its label; the result is shown and announced in a status line below the code. If copying fails, the code is selected and keyboard focus stays on the button.

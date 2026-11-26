@@ -49,3 +49,74 @@
 	overflow-x: auto;
 	resize: none;
 }
+
+/* Head of the editing view: language, file name, line count and the main settings at a glance. */
+.cbb-editor__head {
+	align-items: center;
+	flex-wrap: wrap;
+}
+
+.cbb-editor__lang {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.cbb-editor__lang::before {
+	content: "";
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: #8c959f;
+}
+
+.cbb-editor__lang[data-lang="php"]::before { background: #777bb3; }
+.cbb-editor__lang[data-lang="javascript"]::before { background: #e5c100; }
+.cbb-editor__lang[data-lang="typescript"]::before { background: #3178c6; }
+.cbb-editor__lang[data-lang="css"]::before { background: #663399; }
+.cbb-editor__lang[data-lang="html"]::before { background: #e34c26; }
+.cbb-editor__lang[data-lang="bash"]::before,
+.cbb-editor__lang[data-lang="powershell"]::before { background: #3fb950; }
+.cbb-editor__lang[data-lang="python"]::before { background: #3572a5; }
+.cbb-editor__lang[data-lang="sql"]::before { background: #e38c00; }
+.cbb-editor__lang[data-lang="diff"]::before { background: #2da44e; }
+
+.cbb-editor__title {
+	padding-left: 10px;
+	border-left: 1px solid #d0d7de;
+	font-family: ui-monospace, "Cascadia Code", "SF Mono", Menlo, Consolas, monospace;
+}
+
+.cbb-editor__meta {
+	display: inline-flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 6px;
+	margin-left: auto;
+	font-weight: 400;
+	letter-spacing: normal;
+	text-transform: none;
+}
+
+.cbb-editor__chip {
+	padding: 0 7px;
+	border: 1px solid #d0d7de;
+	border-radius: 999px;
+	background: #fff;
+	line-height: 18px;
+}
+
+.cbb-editor__chip.is-on {
+	border-color: #1a7f37;
+	color: #1a7f37;
+}
+
+.cbb-editor__chip.is-mark {
+	border-color: #d4a72c;
+	background: #fff8c5;
+	color: #6c4a00;
+}
+
+.cbb-editor__invalid .components-base-control__help {
+	color: #b32d2e;
+}

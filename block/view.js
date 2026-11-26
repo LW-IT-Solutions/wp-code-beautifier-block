@@ -128,6 +128,8 @@
 				selected = selectCode( code );
 				focusWithoutScroll( button );
 			}
+			line.classList.toggle( 'is-ok', ok );
+			line.classList.toggle( 'is-failed', ! ok );
 			if ( ok ) {
 				line.textContent = message( button, 'done', 'data-cbb-done' );
 			} else if ( selected ) {
@@ -141,6 +143,7 @@
 					return;
 				}
 				line.textContent = '';
+				line.classList.remove( 'is-ok', 'is-failed' );
 				button.classList.remove( 'is-done' );
 			}, ok ? 2000 : 6000 ) );
 		} );
