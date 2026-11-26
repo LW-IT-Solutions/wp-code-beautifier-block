@@ -7,6 +7,9 @@
 ( function () {
 	'use strict';
 
+	// Timers of the copy buttons, kept here instead of as a property on the element.
+	var timers = new WeakMap();
+
 	document.documentElement.classList.add( 'cbb-js' );
 
 	function codeText( block ) {
@@ -74,11 +77,11 @@
 			}
 			label.textContent = button.getAttribute( ok ? 'data-cbb-done' : 'data-cbb-failed' );
 			button.classList.toggle( 'is-done', ok );
-			window.clearTimeout( button.cbbTimer );
-			button.cbbTimer = window.setTimeout( function () {
+			window.clearTimeout( timers.get( button ) );
+			timers.set( button, window.setTimeout( function () {
 				label.textContent = button.getAttribute( 'data-cbb-label' );
 				button.classList.remove( 'is-done' );
-			}, 2000 );
+			}, 2000 ) );
 		} );
 	}
 

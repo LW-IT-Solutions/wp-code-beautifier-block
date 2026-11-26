@@ -141,6 +141,15 @@ final class Code_Beautifier_Renderer {
 	 * WordPress runs shortcodes after the blocks: a [gallery] in a code sample
 	 * would otherwise be executed instead of shown.
 	 *
+	 * Why not esc_html(): it does not encode an ampersand that already starts an
+	 * entity, so a code sample that shows "&amp;" or "&lt;" would be displayed
+	 * as "&" or "<", which changes the code. Here every ampersand is encoded, and
+	 * so are <, > and invalid UTF-8 (ENT_SUBSTITUTE). Quotes stay as they are,
+	 * because the result is only ever used as text between tags, never inside an
+	 * attribute. Everything render() returns around this text is fixed markup;
+	 * its dynamic parts go through esc_attr(), esc_html() and
+	 * get_block_wrapper_attributes().
+	 *
 	 * @param string $text Text.
 	 * @return string
 	 */

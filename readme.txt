@@ -4,7 +4,7 @@ Tags: code, syntax highlighting, code block, snippet, block
 Requires at least: 6.5
 Tested up to: 7.2
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -48,7 +48,7 @@ Available: `--cbb-bg`, `--cbb-fg`, `--cbb-head-bg`, `--cbb-border`, `--cbb-muted
 
 = Does it load JavaScript on every page? =
 
-No. The stylesheet and the script for the two buttons (under 3 KB, no dependencies) are loaded only on pages that contain the block.
+No. The script for the copy and wrap buttons (under 3 KB, no dependencies) is loaded only on pages that contain the block. Whether the stylesheet is limited to those pages as well depends on WordPress and the theme: block themes load it only where the block is used, while classic themes may load the stylesheets of all blocks, this one included, on every page.
 
 = What happens with shortcodes inside a code sample? =
 
@@ -64,6 +64,10 @@ Yes, per block in the block settings ("Wrap long lines"). Readers can still swit
 2. Light mode: a long URL without spaces wraps inside the block instead of widening the page.
 
 == Changelog ==
+
+= 1.0.1 =
+* The readme says exactly when the script and the stylesheet are loaded.
+* Code comments explain the escaping of the code text. The block output is unchanged.
 
 = 1.0.0 =
 * First release.
