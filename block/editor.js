@@ -4,6 +4,11 @@
  * Plain JavaScript without a build step. The block saves a plain <pre><code>
  * copy of the code; the highlighted markup is rendered on the server, and the
  * "Preview" button shows exactly that rendering inside the editor.
+ *
+ * 1.2.0: while editing, line numbers stand next to the code and highlighted
+ * lines are marked; a click on a number (Shift+click for a range, or arrow
+ * keys and Space) switches the line in "Highlight lines". The head shows the
+ * longest line. None of this changes what the block saves.
  */
 ( function ( blocks, element, blockEditor, components, i18n, ServerSideRender ) {
 	'use strict';
@@ -62,6 +67,45 @@
 		return { count: count, bad: bad };
 	}
 
+	// The set of highlighted line numbers, as Code_Beautifier_Renderer::marked_lines() reads it.
+	function markedSet( spec ) {
+		var set = {};
+		String( spec || '' ).split( ',' ).forEach( function ( part ) {
+			var m;
+			var i;
+			part = part.trim();
+			m = /^(\d+)\s*-\s*(\d+)$/.exec( part );
+			if ( m ) {
+				for ( i = parseInt( m[ 1 ], 10 ); i <= Math.min( parseInt( m[ 2 ], 10 ), parseInt( m[ 1 ], 10 ) + 5000 ); i++ ) {
+					set[ i ] = true;
+				}
+			} else if ( /^\d+$/.test( part ) ) {
+				set[ parseInt( part, 10 ) ] = true;
+			}
+		} );
+		return set;
+	}
+
+	// A set of line numbers as a short list: 2, 5-7.
+	function setToSpec( set ) {
+		var nums = Object.keys( set ).map( function ( n ) {
+			return parseInt( n, 10 );
+		} ).sort( function ( a, b ) {
+			return a - b;
+		} );
+		var out = [];
+		var i = 0;
+		while ( i < nums.length ) {
+			var j = i;
+			while ( j + 1 < nums.length && nums[ j + 1 ] === nums[ j ] + 1 ) {
+				j++;
+			}
+			out.push( j > i ? nums[ i ] + '-' + nums[ j ] : String( nums[ i ] ) );
+			i = j + 1;
+		}
+		return out.join( ', ' );
+	}
+
 	function linesHelp( spec ) {
 		var parsed = parseLines( spec );
 		if ( parsed.bad.length ) {
@@ -81,6 +125,12 @@
 		var preview = useState( false );
 		var isPreview = preview[ 0 ];
 		var setPreview = preview[ 1 ];
+		var focusState = useState( 0 );
+		var focusLine = focusState[ 0 ];
+		var setFocusLine = focusState[ 1 ];
+		var anchorState = useState( null );
+		var anchorLine = anchorState[ 0 ];
+		var setAnchorLine = anchorState[ 1 ];
 		var blockProps = blockEditor.useBlockProps( { className: 'cbb-editor' } );
 		var current = languages.filter( function ( l ) {
 			return l.value === attributes.language;
@@ -156,11 +206,115 @@
 						setAttributes( { wrap: value } );
 					},
 					__nextHasNoMarginBottom: true,
+				} ),
+				el( components.ToggleControl, {
+					label: __( 'Collapse long code', 'code-beautifier-block' ),
+					help: __( 'From 25 lines on, readers first see 15 lines and a button that shows all. The whole code stays in the page and is copied in full.', 'code-beautifier-block' ),
+					checked: !! attributes.collapse,
+					onChange: function ( value ) {
+						setAttributes( { collapse: value } );
+					},
+					__nextHasNoMarginBottom: true,
 				} )
 			)
 		);
 
 		var lineCount = ( attributes.code || '' ).replace( /\s+$/, '' ).split( '\n' ).length;
+		var codeLines = ( attributes.code || '' ).split( '\n' );
+		var longest = codeLines.reduce( function ( max, line ) {
+			return Math.max( max, line.replace( /\t/g, '    ' ).length );
+		}, 0 );
+		var start = typeof attributes.startLine === 'number' ? attributes.startLine : 1;
+		var marked = markedSet( attributes.highlightLines );
+
+		// Switch one line (or, with Shift, the range from the last clicked line) in "Highlight lines".
+		function toggleLine( number, range ) {
+			var set = markedSet( attributes.highlightLines );
+			var on = ! set[ number ];
+			var from = number;
+			var to = number;
+			var n;
+			if ( range && null !== anchorLine ) {
+				from = Math.min( anchorLine, number );
+				to = Math.max( anchorLine, number );
+				on = true;
+			}
+			for ( n = from; n <= to; n++ ) {
+				if ( on ) {
+					set[ n ] = true;
+				} else {
+					delete set[ n ];
+				}
+			}
+			setAnchorLine( number );
+			setAttributes( { highlightLines: setToSpec( set ) } );
+		}
+
+		function onGutterKey( event, index ) {
+			var next = index;
+			if ( 'ArrowDown' === event.key ) {
+				next = Math.min( codeLines.length - 1, index + 1 );
+			} else if ( 'ArrowUp' === event.key ) {
+				next = Math.max( 0, index - 1 );
+			} else if ( 'Home' === event.key ) {
+				next = 0;
+			} else if ( 'End' === event.key ) {
+				next = codeLines.length - 1;
+			} else {
+				return;
+			}
+			event.preventDefault();
+			setFocusLine( next );
+			var target = event.currentTarget.parentNode.children[ next ];
+			if ( target ) {
+				target.focus();
+			}
+		}
+
+		var gutter = attributes.code
+			? el(
+				'div',
+				{
+					className: 'cbb-editor__gutter',
+					role: 'group',
+					'aria-label': __( 'Line numbers: switch the highlighting of a line', 'code-beautifier-block' ),
+				},
+				codeLines.map( function ( line, index ) {
+					var number = start + index;
+					return el(
+						'button',
+						{
+							key: index,
+							type: 'button',
+							className: 'cbb-editor__num' + ( marked[ number ] ? ' is-marked' : '' ),
+							'aria-pressed': marked[ number ] ? 'true' : 'false',
+							tabIndex: index === Math.min( focusLine, codeLines.length - 1 ) ? 0 : -1,
+							/* translators: %d: line number */
+							'aria-label': sprintf( __( 'Highlight line %d', 'code-beautifier-block' ), number ),
+							onClick: function ( event ) {
+								setFocusLine( index );
+								toggleLine( number, event.shiftKey );
+							},
+							onKeyDown: function ( event ) {
+								onGutterKey( event, index );
+							},
+						},
+						String( number )
+					);
+				} )
+			)
+			: null;
+		var marks = attributes.code
+			? el(
+				'div',
+				{ className: 'cbb-editor__marks', 'aria-hidden': 'true' },
+				codeLines.map( function ( line, index ) {
+					return marked[ start + index ]
+						? el( 'span', { key: index, style: { top: 'calc(14px + ' + index + ' * 1.65em)' } } )
+						: null;
+				} )
+			)
+			: null;
 		var languageMenu = components.ToolbarDropdownMenu
 			? el( components.ToolbarDropdownMenu, {
 				icon: 'editor-code',
@@ -221,24 +375,47 @@
 							)
 							: null,
 						el( 'span', { className: 'cbb-editor__chip' + ( attributes.wrap ? ' is-on' : '' ) }, attributes.wrap ? __( 'Wraps', 'code-beautifier-block' ) : __( 'Scrolls', 'code-beautifier-block' ) ),
+						longest > 80
+							? el(
+								'span',
+								{
+									className: 'cbb-editor__chip' + ( attributes.wrap ? '' : ' is-warn' ),
+									title: attributes.wrap
+										? __( 'Long lines wrap inside the block.', 'code-beautifier-block' )
+										: __( 'Without wrapping, long lines scroll sideways inside the block, especially on phones.', 'code-beautifier-block' ),
+								},
+								/* translators: %d: number of characters of the longest line */
+								sprintf( __( 'Longest line: %d characters', 'code-beautifier-block' ), longest )
+							)
+							: null,
 						attributes.highlightLines && parseLines( attributes.highlightLines ).count
 							? el( 'span', { className: 'cbb-editor__chip is-mark' }, __( 'Highlighted lines', 'code-beautifier-block' ) )
 							: null
 					)
 				),
-				el( blockEditor.PlainText, {
-					className: 'cbb-editor__input',
-					value: attributes.code || '',
-					onChange: function ( value ) {
-						setAttributes( { code: value } );
-					},
-					placeholder: __( 'Paste or write code…', 'code-beautifier-block' ),
-					'aria-label': __( 'Code', 'code-beautifier-block' ),
-					spellCheck: false,
-					autoCapitalize: 'off',
-					autoComplete: 'off',
-					autoCorrect: 'off',
-				} )
+				el(
+					'div',
+					{ className: 'cbb-editor__body' + ( gutter ? ' has-gutter' : '' ) },
+					gutter,
+					el(
+						'div',
+						{ className: 'cbb-editor__field' },
+						marks,
+						el( blockEditor.PlainText, {
+							className: 'cbb-editor__input',
+							value: attributes.code || '',
+							onChange: function ( value ) {
+								setAttributes( { code: value } );
+							},
+							placeholder: __( 'Paste or write code…', 'code-beautifier-block' ),
+							'aria-label': __( 'Code', 'code-beautifier-block' ),
+							spellCheck: false,
+							autoCapitalize: 'off',
+							autoComplete: 'off',
+							autoCorrect: 'off',
+						} )
+					)
+				)
 			);
 
 		return el( Fragment, null, toolbar, inspector, el( 'div', blockProps, body ) );

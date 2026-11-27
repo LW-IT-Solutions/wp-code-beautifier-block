@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Code Beautifier Block
  * Description:       A code block with server-side syntax highlighting that stays inside the layout: long lines wrap or scroll within the block, never the page.
- * Version:           1.1.0
+ * Version:           1.2.0
  * Requires at least: 6.5
  * Requires PHP:      7.4
  * Author:            LW IT Solutions

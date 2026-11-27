@@ -18,6 +18,11 @@ defined( 'ABSPATH' ) || exit;
 final class Code_Beautifier_Renderer {
 
 	/**
+	 * Number of lines from which "Collapse long code" shortens a block.
+	 */
+	const COLLAPSE_FROM = 25;
+
+	/**
 	 * Block render callback.
 	 *
 	 * @param array         $attributes Block attributes.
@@ -61,16 +66,26 @@ final class Code_Beautifier_Renderer {
 		if ( $numbers ) {
 			$classes[] = 'cbb--numbers';
 		}
+		// 1.2.0: long code can be shown shortened (opt-in per block). Only a class and
+		// data attributes are added; the code itself is always complete in the page.
+		$collapse = ! empty( $attributes['collapse'] ) && $count >= self::COLLAPSE_FROM;
+		if ( $collapse ) {
+			$classes[] = 'cbb--collapsible';
+		}
 		$digits  = strlen( (string) ( $start + $count - 1 ) );
-		$wrapper = get_block_wrapper_attributes(
-			array(
-				'class'     => implode( ' ', $classes ),
-				'style'     => '--cbb-digits:' . absint( $digits ) . ';',
-				'data-lang' => $lang,
-			)
+		$texts   = self::interface_texts( $block );
+		$extra   = array(
+			'class'     => implode( ' ', $classes ),
+			'style'     => '--cbb-digits:' . absint( $digits ) . ';',
+			'data-lang' => $lang,
 		);
+		if ( $collapse ) {
+			$extra['data-cbb-lines'] = (string) $count;
+			$extra['data-cbb-more']  = sprintf( $texts['more'], $count );
+			$extra['data-cbb-less']  = $texts['less'];
+		}
+		$wrapper = get_block_wrapper_attributes( $extra );
 
-		$texts = self::interface_texts( $block );
 		$label = Code_Beautifier_Highlighter::label( $lang );
 		$head  = '<figcaption class="cbb-head">'
 			. '<span class="cbb-lang">' . esc_html( $label ) . '</span>'
@@ -80,7 +95,7 @@ final class Code_Beautifier_Renderer {
 			. '<svg class="cbb-icon-wrap" aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16"><path d="M2 4h12M2 8h9.5a2.5 2.5 0 0 1 0 5H8m0 0 1.5-1.5M8 13l1.5 1.5M2 12h3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
 			. '<span class="cbb-sr">' . esc_html( $texts['wrap'] ) . '</span>'
 			. '</button>'
-			. '<button type="button" class="cbb-button cbb-button--copy" data-cbb-action="copy" aria-label="' . esc_attr( $texts['copy_name'] ) . '" data-cbb-status-done="' . esc_attr( $texts['status_done'] ) . '" data-cbb-status-failed="' . esc_attr( $texts['status_failed'] ) . '" data-cbb-status-noselect="' . esc_attr( $texts['status_noselect'] ) . '">'
+			. '<button type="button" class="cbb-button cbb-button--copy" data-cbb-action="copy" aria-label="' . esc_attr( $texts['copy_name'] ) . '" data-cbb-status-done="' . esc_attr( $texts['status_done'] ) . '" data-cbb-status-failed="' . esc_attr( $texts['status_failed'] ) . '" data-cbb-status-noselect="' . esc_attr( $texts['status_noselect'] ) . '" data-cbb-status-line="' . esc_attr( $texts['status_line'] ) . '">'
 			. '<svg class="cbb-icon-copy" aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16"><rect x="5.5" y="5.5" width="8" height="8.5" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M10.5 3.5V3A1.5 1.5 0 0 0 9 1.5H4A1.5 1.5 0 0 0 2.5 3v6.5A1.5 1.5 0 0 0 4 11h.5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>'
 			. '<svg class="cbb-icon-done" aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16"><path d="M3 8.5 6.5 12 13 4.5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>'
 			. '<span class="cbb-button-label">' . esc_html( $texts['copy'] ) . '</span>'
@@ -119,6 +134,11 @@ final class Code_Beautifier_Renderer {
 			'status_done'     => __( 'Code copied to the clipboard.', 'code-beautifier-block' ),
 			'status_failed'   => __( 'Copying failed. The code is selected for copying with Ctrl+C or ⌘+C.', 'code-beautifier-block' ),
 			'status_noselect' => __( 'Copying failed.', 'code-beautifier-block' ),
+			/* translators: %d: line number */
+			'status_line'     => __( 'Line %d selected. Copy it with Ctrl+C or ⌘+C.', 'code-beautifier-block' ),
+			/* translators: %d: number of lines of the code sample */
+			'more'            => __( 'Show all lines (%d)', 'code-beautifier-block' ),
+			'less'            => __( 'Show fewer lines', 'code-beautifier-block' ),
 		);
 
 		$post_id = ( $block instanceof WP_Block && ! empty( $block->context['postId'] ) ) ? absint( $block->context['postId'] ) : absint( get_the_ID() );
@@ -144,6 +164,9 @@ final class Code_Beautifier_Renderer {
 			'status_done'     => 'Code copied to the clipboard.',
 			'status_failed'   => 'Copying failed. The code is selected for copying with Ctrl+C or ⌘+C.',
 			'status_noselect' => 'Copying failed.',
+			'status_line'     => 'Line %d selected. Copy it with Ctrl+C or ⌘+C.',
+			'more'            => 'Show all lines (%d)',
+			'less'            => 'Show fewer lines',
 		);
 		if ( ! self::load_translation( $locale ) ) {
 			return $source;
